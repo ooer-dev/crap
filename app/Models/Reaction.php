@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Reaction extends Model
 {
-    use HasFactory;
+    use BroadcastsEvents, HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -34,6 +36,16 @@ class Reaction extends Model
     protected $appends = [
         'has_target',
     ];
+
+    /**
+     * Get the channels that model events should broadcast on.
+     *
+     * @return array<int, \Illuminate\Broadcasting\Channel|\Illuminate\Database\Eloquent\Model>
+     */
+    public function broadcastOn(string $event): array
+    {
+        return [new PrivateChannel('reactions')];
+    }
 
     /**
      * Determine if the reaction has a target in the response.
