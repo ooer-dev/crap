@@ -14,4 +14,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::resource('reaction', ReactionController::class)->except(['create', 'edit']);
+Route::resource('guild.reaction', ReactionController::class)->except(['create', 'edit']);

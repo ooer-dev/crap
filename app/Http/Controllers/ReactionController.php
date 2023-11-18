@@ -23,9 +23,9 @@ class ReactionController extends Controller
     /**
      * Return a listing of the resource.
      */
-    public function index()
+    public function index(int $guildId)
     {
-        $reactions = Reaction::all();
+        $reactions = Reaction::where('guild_id', $guildId)->get();
 
         return ReactionResource::collection($reactions);
     }
@@ -33,10 +33,10 @@ class ReactionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreReactionRequest $request)
+    public function store(StoreReactionRequest $request, int $guildId)
     {
         $attributes = $request->validated();
-        $attributes['guild_id'] = config('services.discord.guild_id');
+        $attributes['guild_id'] = $guildId;
 
         $reaction = Reaction::create($attributes);
 
@@ -46,16 +46,24 @@ class ReactionController extends Controller
     /**
      * Return the specified resource.
      */
-    public function show(Reaction $reaction)
+    public function show(int $guildId, Reaction $reaction)
     {
+        if ($reaction->guild_id !== $guildId) {
+            abort(404);
+        }
+
         return new ReactionResource($reaction);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateReactionRequest $request, Reaction $reaction)
+    public function update(UpdateReactionRequest $request, int $guildId, Reaction $reaction)
     {
+        if ($reaction->guild_id !== $guildId) {
+            abort(404);
+        }
+
         $reaction->update($request->validated());
 
         return new ReactionResource($reaction);
@@ -64,8 +72,12 @@ class ReactionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Reaction $reaction)
+    public function destroy(int $guildId, Reaction $reaction)
     {
+        if ($reaction->guild_id !== $guildId) {
+            abort(404);
+        }
+
         $reaction->delete();
 
         return response()->noContent();

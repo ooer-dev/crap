@@ -14,8 +14,8 @@ class UpdateReactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'trigger' => 'required|string|max:255',
-            'response' => 'required|string',
+            'trigger' => 'string|max:255',
+            'response' => 'string',
 
             'contains_anywhere' => 'boolean',
             'delete_trigger' => 'boolean',
