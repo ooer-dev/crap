@@ -23,6 +23,12 @@ WORKDIR /app
 # Builder stage - install dependencies
 FROM base AS builder
 
+# Install system dependencies for Composer
+RUN set -ex \
+    && apt-get update \
+    && apt-get install --no-install-recommends -y git unzip \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
