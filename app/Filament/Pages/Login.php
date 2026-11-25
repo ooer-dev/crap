@@ -4,16 +4,18 @@ namespace App\Filament\Pages;
 
 use App\Models\User;
 use Filament\Actions\Action;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse;
+use Filament\Auth\Pages\Login as BaseLogin;
 use Filament\Facades\Filament;
-use Filament\Forms\Form;
-use Filament\Http\Responses\Auth\Contracts\LoginResponse;
-use Filament\Pages\Auth\Login as BaseLogin;
+use Filament\Schemas\Schema;
+use Filament\Support\Components\Attributes\Exposed;
+use Filament\Support\Components\Attributes\Unexposed;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class Login extends BaseLogin
 {
+    #[Unexposed]
     public function mount(): void
     {
         if (request()->has('code')) {
@@ -23,26 +25,27 @@ class Login extends BaseLogin
         parent::mount();
     }
 
+    #[Exposed]
     public function authenticate(): ?LoginResponse
     {
-        $resp = Socialite::driver('discord')->scopes(['guilds'])->redirect();
+        $resp = Socialite::driver('discord')->setScopes(['identify', 'guilds'])->redirect();
         $this->redirect($resp->getTargetUrl());
 
         return null;
     }
 
-    public function callback(): void
+    protected function callback(): void
     {
         $discordUser = Socialite::driver('discord')->user();
 
         $guilds = Http::withToken($discordUser->token)
             ->get('https://discord.com/api/v10/users/@me/guilds')
+            ->throw()
             ->json();
 
-        $guildId = config('services.discord.guild_id');
-        $guild = collect($guilds)->firstWhere('id', $guildId);
+        $guild = collect($guilds)->firstWhere('id', config('services.discord.guild_id'));
 
-        $permissions = (int) $guild['permissions'];
+        $permissions = (int) ($guild['permissions'] ?? 0);
         $isAdmin = ($permissions & 0x8) === 0x8;
 
         if (! $isAdmin) {
@@ -53,18 +56,15 @@ class Login extends BaseLogin
             'discord_id' => $discordUser->id,
         ], [
             'name' => $discordUser->nickname,
-            'email' => $discordUser->email,
-            'password' => Str::password(),
         ]);
 
         Filament::auth()->login($user);
-
-        redirect()->intended(Filament::getUrl());
     }
 
-    public function form(Form $form): Form
+    #[Unexposed]
+    public function form(Schema $schema): Schema
     {
-        return $form->schema([]);
+        return $schema->components([]);
     }
 
     protected function getFormActions(): array

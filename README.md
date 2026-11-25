@@ -7,7 +7,7 @@ Discord staff team to help manage the Custom Reactions on the server.
 
 ### Prerequisites
 
-- PHP 8.1 or higher
+- PHP 8.4 or higher
 - Composer
 - A web server (Apache, NGINX, etc.)
 - A database (MySQL, MariaDB, Postgres, etc.)

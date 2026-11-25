@@ -10,18 +10,7 @@ use App\Models\Reaction;
 class ReactionController extends Controller
 {
     /**
-     * Create the controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-
-        $this->middleware('ability:reaction:read')->only('index', 'show');
-        $this->middleware('ability:reaction:write')->only('store', 'update', 'destroy');
-    }
-
-    /**
-     * Return a listing of the resource.
+     * Display a listing of the resource.
      */
     public function index(int $guildId)
     {
@@ -44,7 +33,7 @@ class ReactionController extends Controller
     }
 
     /**
-     * Return the specified resource.
+     * Display the specified resource.
      */
     public function show(int $guildId, Reaction $reaction)
     {
